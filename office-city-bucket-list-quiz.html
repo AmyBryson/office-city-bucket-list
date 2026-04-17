@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Office Bucket List League</title>
+<style>
+/* ============================================================
+   GLOBAL RESET & VARIABLES
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0B1F3A;
+  --card-bg: #122B4A;
+  --primary: #1E6BFF;
+  --accent: #4DA3FF;
+  --text: #FFFFFF;
+  --text-secondary: #AFC7E0;
+  --success: #00E676;
+  --gold: #FFD700;
+  --glow: 0 0 20px rgba(30,107,255,0.4);
+  --card-radius: 12px;
+  --transition: 0.3s ease;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+body.reduced-motion *, body.reduced-motion *::before, body.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+html { font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+.hidden { display: none !important; }
+.container { max-width: 720px; margin: 0 auto; padding: 20px; }
+
+/* ============================================================
+   HEADER BAR
+   ============================================================ */
+.top-bar {
+  background: var(--card-bg);
+  border-bottom: 2px solid var(--primary);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky; top: 0; z-index: 100;
+}
+.top-bar .logo {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.top-bar .score-display {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.top-bar .score-display span { color: var(--accent); }
+.settings-btn {
+  background: none; border: none; color: var(--text-secondary);
+  cursor: pointer; font-size: 1.2rem; padding: 4px;
+}
+.settings-btn:hover { color: var(--accent); }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 32px;
+  border: none; border-radius: 8px;
+  font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: all var(--transition);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff; box-shadow: var(--glow);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(30,107,255,0.6); }
+.btn-secondary {
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--text-secondary);
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.btn-small { padding: 8px 18px; font-size: 0.85rem; }
+
+/* ============================================================
+   WELCOME SCREEN
+   ============================================================ */
+#welcome-screen {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 100vh; text-align: center;
+  padding: 20px;
+}
+#welcome-screen h1 {
+  font-size: 2.4rem; font-weight: 900; letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+#welcome-screen .subtitle {
+  color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 32px;
+}
+#welcome-screen .globe-icon { margin-bottom: 24px; }
+.username-input {
+  background: var(--card-bg); border: 2px solid var(--primary);
+  border-radius: 8px; padding: 14px 20px;
+  font-size: 1.1rem; color: var(--text); width: 100%; max-width: 360px;
+  margin-bottom: 20px; outline: none; text-align: center;
+}
+.username-input::placeholder { color: var(--text-secondary); }
+.username-input:focus { border-color: var(--accent); box-shadow: var(--glow); }
+
+/* ============================================================
+   GAME SCREEN
+   ============================================================ */
+#game-screen .city-header {
+  text-align: center; margin-bottom: 24px;
+}
+#game-screen .city-header .round-label {
+  font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px;
+  color: var(--text-secondary); margin-bottom: 4px;
+}
+#game-screen .city-header h2 {
+  font-size: 2rem; font-weight: 800; margin-bottom: 12px;
+}
+.city-illustration {
+  display: flex; justify-content: center; margin-bottom: 20px;
+}
+.city-illustration svg { max-width: 280px; height: auto; }
+
+/* ============================================================
+   PROGRESS BARS
+   ============================================================ */
+.progress-section { margin-bottom: 24px; }
+.progress-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px;
+}
+.progress-bar-track {
+  width: 100%; height: 10px; background: rgba(255,255,255,0.08);
+  border-radius: 5px; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%; border-radius: 5px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  transition: width 0.6s ease; box-shadow: 0 0 10px rgba(30,107,255,0.5);
+  width: 0%;
+}
+.progress-bar-fill.city-fill { background: linear-gradient(90deg, var(--accent), var(--success)); }
+
+/* ============================================================
+   CHECKLIST CARDS
+   ============================================================ */
+.checklist { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.check-card {
+  background: var(--card-bg); border: 2px solid transparent;
+  border-radius: var(--card-radius); padding: 16px 20px;
+  cursor: pointer; transition: all var(--transition);
+  display: flex; align-items: center; gap: 14px;
+  user-select: none;
+}
+.check-card:hover { border-color: var(--primary); transform: translateX(4px); }
+.check-card.selected {
+  border-color: var(--accent); background: rgba(30,107,255,0.15);
+}
+.check-card.selected .check-box { background: var(--accent); border-color: var(--accent); }
+.check-card.selected .check-box::after { opacity: 1; }
+.check-card.none-card { border-style: dashed; opacity: 0.7; }
+.check-card.none-card.selected { opacity: 1; }
+
+.check-box {
+  width: 24px; height: 24px; min-width: 24px;
+  border: 2px solid var(--text-secondary); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition); position: relative;
+}
+.check-box::after {
+  content: '✓'; font-size: 14px; font-weight: 900;
+  color: #fff; opacity: 0; transition: opacity var(--transition);
+}
+.check-label { font-size: 0.95rem; font-weight: 500; }
+
+/* Feedback toast */
+.feedback-toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--primary); color: #fff; padding: 12px 28px;
+  border-radius: 30px; font-weight: 700; font-size: 0.95rem;
+  box-shadow: 0 4px 20px rgba(30,107,255,0.5);
+  opacity: 0; transition: all 0.4s ease; z-index: 200;
+  pointer-events: none;
+}
+.feedback-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Point pop animation */
+.point-pop {
+  position: fixed; font-size: 1.4rem; font-weight: 900;
+  color: var(--accent); pointer-events: none; z-index: 300;
+  animation: pointFloat 1s ease-out forwards;
+}
+@keyframes pointFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+}
+
+/* Round navigation */
+.round-nav {
+  display: flex; gap: 12px; justify-content: center; margin-top: 24px;
+}
+
+/* ============================================================
+   RESULTS SCREEN
+   ============================================================ */
+#results-screen { text-align: center; }
+#results-screen h2 {
+  font-size: 2rem; font-weight: 900; margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.results-message {
+  font-size: 1.2rem; color: var(--accent); font-weight: 600;
+  margin-bottom: 28px;
+}
+.results-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px; margin-bottom: 32px;
+}
+.stat-card {
+  background: var(--card-bg); border-radius: var(--card-radius);
+  padding: 20px 14px; text-align: center;
+}
+.stat-card .stat-value {
+  font-size: 1.8rem; font-weight: 900; color: var(--accent);
+}
+.stat-card .stat-label {
+  font-size: 0.8rem; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;
+}
+
+/* Badges */
+.badges-section { margin-bottom: 32px; }
+.badges-section h3 {
+  font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 14px; color: var(--text-secondary);
+}
+.badges-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.badge-item {
+  background: var(--card-bg); border-radius: var(--card-radius);
+  padding: 16px 20px; text-align: center; min-width: 120px;
+  border: 2px solid transparent; opacity: 0.35;
+}
+.badge-item.unlocked {
+  opacity: 1; border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(255,215,0,0.3);
+}
+.badge-item .badge-icon { font-size: 2rem; margin-bottom: 6px; }
+.badge-item .badge-name { font-size: 0.8rem; font-weight: 700; }
+
+/* ============================================================
+   LEADERBOARD
+   ============================================================ */
+#leaderboard-screen h2 {
+  text-align: center; font-size: 1.6rem; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 20px;
+}
+.leaderboard-table {
+  width: 100%; border-collapse: collapse; margin-bottom: 24px;
+}
+.leaderboard-table th {
+  background: var(--card-bg); color: var(--text-secondary);
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+  padding: 12px 10px; text-align: left; cursor: pointer;
+  user-select: none; white-space: nowrap;
+}
+.leaderboard-table th:hover { color: var(--accent); }
+.leaderboard-table th.sorted { color: var(--accent); }
+.leaderboard-table th .sort-arrow { margin-left: 4px; font-size: 0.7rem; }
+.leaderboard-table td {
+  padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.9rem;
+}
+.leaderboard-table tr:hover td { background: rgba(30,107,255,0.08); }
+.leaderboard-table .rank-cell { font-weight: 800; color: var(--accent); width: 40px; }
+.leaderboard-table .highlight-row td { background: rgba(30,107,255,0.12); }
+
+/* Team stats */
+.team-stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px; margin-bottom: 28px;
+}
+
+/* ============================================================
+   SETTINGS PANEL
+   ============================================================ */
+.settings-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 500; display: flex; align-items: center; justify-content: center;
+}
+.settings-panel {
+  background: var(--card-bg); border-radius: var(--card-radius);
+  padding: 28px; max-width: 360px; width: 90%;
+}
+.settings-panel h3 { margin-bottom: 20px; font-size: 1.2rem; }
+.setting-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.setting-row label { font-size: 0.9rem; color: var(--text-secondary); }
+/* Toggle switch */
+.toggle { position: relative; width: 48px; height: 26px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle .slider {
+  position: absolute; inset: 0; background: rgba(255,255,255,0.15);
+  border-radius: 26px; cursor: pointer; transition: var(--transition);
+}
+.toggle .slider::before {
+  content: ''; position: absolute; width: 20px; height: 20px;
+  left: 3px; bottom: 3px; background: #fff; border-radius: 50%;
+  transition: var(--transition);
+}
+.toggle input:checked + .slider { background: var(--primary); }
+.toggle input:checked + .slider::before { transform: translateX(22px); }
+
+/* ============================================================
+   CITY BREAKDOWN (results)
+   ============================================================ */
+.city-breakdown { margin-bottom: 28px; }
+.city-breakdown h3 {
+  font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 14px; color: var(--text-secondary); text-align: center;
+}
+.city-score-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.city-score-row .city-name { width: 100px; font-weight: 600; font-size: 0.9rem; }
+.city-score-row .city-bar-track {
+  flex: 1; height: 8px; background: rgba(255,255,255,0.08);
+  border-radius: 4px; overflow: hidden;
+}
+.city-score-row .city-bar-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  transition: width 0.8s ease;
+}
+.city-score-row .city-pts { width: 50px; text-align: right; font-weight: 700; font-size: 0.9rem; color: var(--accent); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 600px) {
+  #welcome-screen h1 { font-size: 1.6rem; }
+  #game-screen .city-header h2 { font-size: 1.5rem; }
+  .container { padding: 14px; }
+  .results-grid { grid-template-columns: repeat(2, 1fr); }
+  .leaderboard-table { font-size: 0.8rem; }
+  .leaderboard-table th, .leaderboard-table td { padding: 8px 6px; }
+  .city-illustration svg { max-width: 200px; }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeInUp 0.5s ease forwards; }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.pulse { animation: pulse 0.4s ease; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     TOP BAR (visible during game)
+     ============================================================ -->
+<div class="top-bar hidden" id="top-bar">
+  <div class="logo">Bucket List League</div>
+  <div class="score-display">Score: <span id="top-score">0</span></div>
+  <button class="settings-btn" id="settings-btn" aria-label="Settings">⚙</button>
+</div>
+
+<!-- ============================================================
+     SETTINGS OVERLAY
+     ============================================================ -->
+<div class="settings-overlay hidden" id="settings-overlay">
+  <div class="settings-panel">
+    <h3>Settings</h3>
+    <div class="setting-row">
+      <label>Reduced Motion</label>
+      <label class="toggle">
+        <input type="checkbox" id="reduced-motion-toggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div style="margin-top:20px; text-align:center;">
+      <button class="btn btn-primary btn-small" id="close-settings">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     WELCOME SCREEN
+     ============================================================ -->
+<div id="welcome-screen">
+  <div class="globe-icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <circle cx="40" cy="40" r="36" stroke="#1E6BFF" stroke-width="3" fill="none"/>
+      <ellipse cx="40" cy="40" rx="18" ry="36" stroke="#4DA3FF" stroke-width="2" fill="none"/>
+      <line x1="4" y1="40" x2="76" y2="40" stroke="#1E6BFF" stroke-width="2"/>
+      <path d="M10 24 Q40 20 70 24" stroke="#4DA3FF" stroke-width="1.5" fill="none"/>
+      <path d="M10 56 Q40 60 70 56" stroke="#4DA3FF" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+  <h1>Office Bucket List League</h1>
+  <p class="subtitle">How well do you know our office cities?</p>
+  <input type="text" class="username-input" id="username-input" placeholder="Enter your name" maxlength="24" autocomplete="off">
+  <br>
+  <button class="btn btn-primary" id="start-btn">Start the League</button>
+</div>
+
+<!-- ============================================================
+     GAME SCREEN
+     ============================================================ -->
+<div id="game-screen" class="hidden">
+  <div class="container">
+    <!-- Global progress -->
+    <div class="progress-section">
+      <div class="progress-label">
+        <span>League Progress</span>
+        <span id="global-progress-text">0 / 7</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="global-progress-bar"></div>
+      </div>
+    </div>
+
+    <!-- City header -->
+    <div class="city-header">
+      <div class="round-label" id="round-label">Round 1 of 7</div>
+      <h2 id="city-title">Edinburgh</h2>
+    </div>
+
+    <!-- City illustration -->
+    <div class="city-illustration" id="city-illustration"></div>
+
+    <!-- City progress -->
+    <div class="progress-section">
+      <div class="progress-label">
+        <span>City Completion</span>
+        <span id="city-progress-text">0 / 5</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill city-fill" id="city-progress-bar"></div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="checklist" id="checklist"></div>
+
+    <!-- Navigation -->
+    <div class="round-nav">
+      <button class="btn btn-secondary btn-small" id="skip-btn">Skip this city</button>
+      <button class="btn btn-primary btn-small" id="next-btn">Next City →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     RESULTS SCREEN
+     ============================================================ -->
+<div id="results-screen" class="hidden">
+  <div class="container">
+    <h2>Final Whistle</h2>
+    <p class="results-message" id="results-message"></p>
+
+    <div class="results-grid" id="results-grid"></div>
+
+    <!-- City breakdown bars -->
+    <div class="city-breakdown" id="city-breakdown">
+      <h3>City Scorecard</h3>
+      <div id="city-bars"></div>
+    </div>
+
+    <!-- Badges -->
+    <div class="badges-section">
+      <h3>Badges</h3>
+      <div class="badges-row" id="badges-row"></div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:32px;">
+      <button class="btn btn-primary" id="view-leaderboard-btn">View Leaderboard</button>
+      <button class="btn btn-secondary" id="replay-btn">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     LEADERBOARD SCREEN
+     ============================================================ -->
+<div id="leaderboard-screen" class="hidden">
+  <div class="container">
+    <h2>Leaderboard</h2>
+
+    <!-- Team stats -->
+    <div class="team-stats" id="team-stats"></div>
+
+    <!-- Table -->
+    <div style="overflow-x:auto;">
+      <table class="leaderboard-table" id="leaderboard-table">
+        <thead><tr id="lb-header"></tr></thead>
+        <tbody id="lb-body"></tbody>
+      </table>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button class="btn btn-secondary btn-small" id="back-results-btn">Back to Results</button>
+      <button class="btn btn-secondary btn-small" id="replay-from-lb-btn">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback toast -->
+<div class="feedback-toast" id="feedback-toast"></div>
+
+<script>
+/* ============================================================
+   DATA: Cities, items, SVG illustrations
+   ============================================================ */
+
+const CITIES = [
+  {
+    name: 'Edinburgh',
+    items: [
+      'Edinburgh Castle',
+      'Walked the Royal Mile',
+      'Hiked Arthur\'s Seat / Holyrood Park',
+      'Visited the National Museum of Scotland',
+      'Seen Greyfriars Bobby / Greyfriars Kirkyard'
+    ],
+    /* Inline SVG: Edinburgh Castle silhouette */
+    svg: `<svg viewBox="0 0 280 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="140" width="280" height="20" rx="4" fill="#1a3a5c"/>
+      <path d="M60 140 L60 80 L80 80 L80 60 L100 60 L100 80 L120 80 L120 50 L140 40 L160 50 L160 80 L180 80 L180 60 L200 60 L200 80 L220 80 L220 140Z" fill="#122B4A" stroke="#4DA3FF" stroke-width="2"/>
+      <rect x="90" y="100" width="16" height="20" rx="2" fill="#1E6BFF" opacity="0.6"/>
+      <rect x="130" y="90" width="20" height="30" rx="2" fill="#1E6BFF" opacity="0.6"/>
+      <rect x="170" y="100" width="16" height="20" rx="2" fill="#1E6BFF" opacity="0.6"/>
+      <rect x="126" y="60" width="28" height="12" rx="2" fill="#4DA3FF" opacity="0.4"/>
+      <line x1="140" y1="40" x2="140" y2="28" stroke="#4DA3FF" stroke-width="2"/>
+      <polygon points="134,28 140,18 146,28" fill="#4DA3FF"/>
+      <circle cx="40" cy="30" r="14" fill="#1E6BFF" opacity="0.15"/>
+      <circle cx="240" cy="40" r="10" fill="#1E6BFF" opacity="0.1"/>
+    </svg>`
+  },
+  {
+    name: 'New York',
+    items: [
+      'Walked through Central Park',
+      'Crossed the Brooklyn Bridge',
+      'Seen Times Square at night',
+      'Visited Grand Central Terminal',
+      'Gone to an observation deck'
+    ],
+    svg: `<svg viewBox="0 0 280 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="140" width="280" height="20" rx="4" fill="#1a3a5c"/>
+      <rect x="40" y="60" width="30" height="80" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <rect x="80" y="40" width="28" height="100" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <rect x="118" y="30" width="24" height="110" rx="2" fill="#122B4A" stroke="#1E6BFF" stroke-width="2"/>
+      <rect x="152" y="50" width="26" height="90" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <rect x="188" y="70" width="30" height="70" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <!-- Statue of Liberty torch -->
+      <line x1="230" y1="140" x2="230" y2="80" stroke="#4DA3FF" stroke-width="3"/>
+      <circle cx="230" cy="74" r="8" fill="#1E6BFF" opacity="0.4"/>
+      <line x1="230" y1="74" x2="230" y2="58" stroke="#FFD700" stroke-width="2"/>
+      <polygon points="224,58 230,46 236,58" fill="#FFD700" opacity="0.7"/>
+      <rect x="48" y="75" width="6" height="8" fill="#1E6BFF" opacity="0.5"/>
+      <rect x="56" y="75" width="6" height="8" fill="#1E6BFF" opacity="0.5"/>
+      <rect x="88" y="55" width="5" height="7" fill="#1E6BFF" opacity="0.5"/>
+      <rect x="97" y="55" width="5" height="7" fill="#1E6BFF" opacity="0.5"/>
+      <rect x="125" y="45" width="5" height="7" fill="#1E6BFF" opacity="0.6"/>
+      <rect x="131" y="45" width="5" height="7" fill="#1E6BFF" opacity="0.6"/>
+    </svg>`
+  },
+  {
+    name: 'Atlanta',
+    items: [
+      'Visited Georgia Aquarium',
+      'Walked part of the Atlanta BeltLine',
+      'Been to World of Coca-Cola',
+      'Visited Centennial Olympic Park',
+      'Seen the Martin Luther King Jr. National Historical Park area'
+    ],
+    svg: `<svg viewBox="0 0 280 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="140" width="280" height="20" rx="4" fill="#1a3a5c"/>
+      <!-- Olympic rings nod -->
+      <circle cx="100" cy="50" r="12" stroke="#4DA3FF" stroke-width="2" fill="none"/>
+      <circle cx="130" cy="50" r="12" stroke="#1E6BFF" stroke-width="2" fill="none"/>
+      <circle cx="160" cy="50" r="12" stroke="#4DA3FF" stroke-width="2" fill="none"/>
+      <circle cx="115" cy="62" r="12" stroke="#1E6BFF" stroke-width="2" fill="none"/>
+      <circle cx="145" cy="62" r="12" stroke="#4DA3FF" stroke-width="2" fill="none"/>
+      <!-- Skyline -->
+      <rect x="50" y="90" width="24" height="50" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <rect x="82" y="80" width="20" height="60" rx="2" fill="#122B4A" stroke="#1E6BFF" stroke-width="1.5"/>
+      <rect x="110" y="85" width="28" height="55" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <rect x="146" y="78" width="22" height="62" rx="2" fill="#122B4A" stroke="#1E6BFF" stroke-width="1.5"/>
+      <rect x="176" y="90" width="26" height="50" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <rect x="210" y="95" width="20" height="45" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <!-- Peach -->
+      <circle cx="240" cy="45" r="10" fill="#FF6B6B" opacity="0.4"/>
+      <path d="M240 35 Q243 28 240 25" stroke="#00E676" stroke-width="1.5" fill="none"/>
+    </svg>`
+  },
+  {
+    name: 'Los Angeles',
+    items: [
+      'Visited Griffith Observatory',
+      'Seen the Hollywood Walk of Fame',
+      'Been to Santa Monica Pier',
+      'Visited The Getty / Getty Center',
+      'Seen the Hollywood Sign viewpoint'
+    ],
+    svg: `<svg viewBox="0 0 280 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="140" width="280" height="20" rx="4" fill="#1a3a5c"/>
+      <!-- Sun -->
+      <circle cx="220" cy="40" r="22" fill="#FFD700" opacity="0.2"/>
+      <circle cx="220" cy="40" r="14" fill="#FFD700" opacity="0.3"/>
+      <!-- Hollywood sign -->
+      <path d="M30 120 L60 90 L120 85 L180 90 L230 100 L250 120" fill="#1a3a5c" stroke="#4DA3FF" stroke-width="1"/>
+      <text x="60" y="108" font-family="Arial" font-weight="900" font-size="16" fill="#4DA3FF" letter-spacing="3">HOLLYWOOD</text>
+      <!-- Palm trees -->
+      <line x1="40" y1="140" x2="42" y2="100" stroke="#4DA3FF" stroke-width="2.5"/>
+      <path d="M42 100 Q30 90 20 95" stroke="#00E676" stroke-width="2" fill="none" opacity="0.6"/>
+      <path d="M42 100 Q50 88 60 92" stroke="#00E676" stroke-width="2" fill="none" opacity="0.6"/>
+      <path d="M42 100 Q42 85 44 90" stroke="#00E676" stroke-width="2" fill="none" opacity="0.6"/>
+      <line x1="248" y1="140" x2="250" y2="105" stroke="#4DA3FF" stroke-width="2.5"/>
+      <path d="M250 105 Q238 95 228 100" stroke="#00E676" stroke-width="2" fill="none" opacity="0.6"/>
+      <path d="M250 105 Q258 93 268 97" stroke="#00E676" stroke-width="2" fill="none" opacity="0.6"/>
+      <path d="M250 105 Q250 90 252 95" stroke="#00E676" stroke-width="2" fill="none" opacity="0.6"/>
+      <!-- Observatory dome -->
+      <path d="M120 140 L120 125 Q140 105 160 125 L160 140Z" fill="#122B4A" stroke="#1E6BFF" stroke-width="2"/>
+      <ellipse cx="140" cy="118" rx="12" ry="8" fill="#1E6BFF" opacity="0.3"/>
+    </svg>`
+  },
+  {
+    name: 'Porto',
+    items: [
+      'Walked around Ribeira',
+      'Crossed or photographed Dom Luís I Bridge',
+      'Visited Livraria Lello',
+      'Climbed Clérigos Tower',
+      'Done a Port wine cellar visit or tasting'
+    ],
+    svg: `<svg viewBox="0 0 280 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Water -->
+      <rect x="0" y="130" width="280" height="30" rx="4" fill="#0d2a4a"/>
+      <path d="M0 135 Q30 130 60 135 Q90 140 120 135 Q150 130 180 135 Q210 140 240 135 Q260 130 280 135" stroke="#4DA3FF" stroke-width="1" fill="none" opacity="0.4"/>
+      <!-- Bridge -->
+      <path d="M40 110 Q140 70 240 110" stroke="#4DA3FF" stroke-width="3" fill="none"/>
+      <line x1="80" y1="98" x2="80" y2="130" stroke="#4DA3FF" stroke-width="1.5"/>
+      <line x1="140" y1="78" x2="140" y2="130" stroke="#4DA3FF" stroke-width="1.5"/>
+      <line x1="200" y1="98" x2="200" y2="130" stroke="#4DA3FF" stroke-width="1.5"/>
+      <!-- Buildings left -->
+      <rect x="20" y="85" width="18" height="45" rx="2" fill="#122B4A" stroke="#1E6BFF" stroke-width="1.5"/>
+      <rect x="42" y="78" width="16" height="52" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <rect x="62" y="82" width="14" height="48" rx="2" fill="#122B4A" stroke="#1E6BFF" stroke-width="1.5"/>
+      <!-- Buildings right -->
+      <rect x="200" y="80" width="18" height="50" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <rect x="222" y="75" width="16" height="55" rx="2" fill="#122B4A" stroke="#1E6BFF" stroke-width="1.5"/>
+      <rect x="242" y="82" width="18" height="48" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <!-- Tower (Clerigos) -->
+      <rect x="130" y="40" width="14" height="50" rx="2" fill="#122B4A" stroke="#1E6BFF" stroke-width="2"/>
+      <polygon points="130,40 137,25 144,40" fill="#1E6BFF" opacity="0.5"/>
+      <!-- Wine glass -->
+      <ellipse cx="260" cy="35" rx="8" ry="5" stroke="#FF6B6B" stroke-width="1.5" fill="#FF6B6B" fill-opacity="0.2"/>
+      <line x1="260" y1="40" x2="260" y2="52" stroke="#FF6B6B" stroke-width="1.5"/>
+      <line x1="254" y1="52" x2="266" y2="52" stroke="#FF6B6B" stroke-width="1.5"/>
+    </svg>`
+  },
+  {
+    name: 'London',
+    items: [
+      'Seen Tower Bridge',
+      'Ridden the London Eye',
+      'Visited the British Museum',
+      'Seen Buckingham Palace',
+      'Walked the South Bank'
+    ],
+    svg: `<svg viewBox="0 0 280 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="140" width="280" height="20" rx="4" fill="#1a3a5c"/>
+      <!-- Big Ben / Elizabeth Tower -->
+      <rect x="40" y="50" width="20" height="90" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="2"/>
+      <polygon points="40,50 50,30 60,50" fill="#4DA3FF" opacity="0.5"/>
+      <circle cx="50" cy="70" r="7" stroke="#1E6BFF" stroke-width="1.5" fill="none"/>
+      <line x1="50" y1="70" x2="50" y2="65" stroke="#1E6BFF" stroke-width="1.5"/>
+      <line x1="50" y1="70" x2="54" y2="72" stroke="#1E6BFF" stroke-width="1.5"/>
+      <!-- London Eye -->
+      <circle cx="140" cy="90" r="42" stroke="#1E6BFF" stroke-width="2" fill="none"/>
+      <line x1="140" y1="132" x2="140" y2="140" stroke="#4DA3FF" stroke-width="3"/>
+      <circle cx="140" cy="48" r="4" fill="#4DA3FF" opacity="0.6"/>
+      <circle cx="170" cy="56" r="4" fill="#4DA3FF" opacity="0.6"/>
+      <circle cx="182" cy="80" r="4" fill="#4DA3FF" opacity="0.6"/>
+      <circle cx="175" cy="110" r="4" fill="#4DA3FF" opacity="0.6"/>
+      <circle cx="150" cy="130" r="4" fill="#4DA3FF" opacity="0.6"/>
+      <circle cx="120" cy="128" r="4" fill="#4DA3FF" opacity="0.6"/>
+      <circle cx="105" cy="110" r="4" fill="#4DA3FF" opacity="0.6"/>
+      <circle cx="98" cy="82" r="4" fill="#4DA3FF" opacity="0.6"/>
+      <circle cx="108" cy="58" r="4" fill="#4DA3FF" opacity="0.6"/>
+      <!-- Tower Bridge hint -->
+      <rect x="210" y="80" width="14" height="60" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <rect x="250" y="80" width="14" height="60" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <path d="M224 90 L224 85 L250 85 L250 90" stroke="#4DA3FF" stroke-width="1.5" fill="none"/>
+      <polygon points="210,80 217,68 224,80" fill="#4DA3FF" opacity="0.4"/>
+      <polygon points="250,80 257,68 264,80" fill="#4DA3FF" opacity="0.4"/>
+    </svg>`
+  },
+  {
+    name: 'Dublin',
+    items: [
+      'Visited Trinity College / Book of Kells',
+      'Been to the Guinness Storehouse',
+      'Walked through Temple Bar',
+      'Visited Dublin Castle',
+      'Walked in Phoenix Park'
+    ],
+    svg: `<svg viewBox="0 0 280 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="140" width="280" height="20" rx="4" fill="#1a3a5c"/>
+      <!-- Harp -->
+      <path d="M50 45 Q50 100 80 120" stroke="#FFD700" stroke-width="2.5" fill="none"/>
+      <path d="M50 45 Q80 50 80 120" stroke="#FFD700" stroke-width="2" fill="none"/>
+      <line x1="56" y1="55" x2="72" y2="58" stroke="#FFD700" stroke-width="1" opacity="0.6"/>
+      <line x1="54" y1="68" x2="74" y2="72" stroke="#FFD700" stroke-width="1" opacity="0.6"/>
+      <line x1="54" y1="80" x2="76" y2="86" stroke="#FFD700" stroke-width="1" opacity="0.6"/>
+      <line x1="56" y1="92" x2="78" y2="100" stroke="#FFD700" stroke-width="1" opacity="0.6"/>
+      <!-- Guinness pint -->
+      <rect x="230" y="60" width="24" height="40" rx="3" fill="#122B4A" stroke="#4DA3FF" stroke-width="2"/>
+      <rect x="230" y="60" width="24" height="10" rx="3" fill="#AFC7E0" opacity="0.4"/>
+      <rect x="254" y="72" width="6" height="16" rx="3" stroke="#4DA3FF" stroke-width="1.5" fill="none"/>
+      <!-- Buildings / Temple Bar area -->
+      <rect x="100" y="80" width="22" height="60" rx="2" fill="#122B4A" stroke="#1E6BFF" stroke-width="1.5"/>
+      <rect x="126" y="70" width="26" height="70" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <rect x="156" y="75" width="20" height="65" rx="2" fill="#122B4A" stroke="#1E6BFF" stroke-width="1.5"/>
+      <rect x="180" y="85" width="24" height="55" rx="2" fill="#122B4A" stroke="#4DA3FF" stroke-width="1.5"/>
+      <!-- Door arches -->
+      <path d="M108 140 L108 125 Q111 118 114 125 L114 140" fill="#1E6BFF" opacity="0.4"/>
+      <path d="M135 140 L135 120 Q139 112 143 120 L143 140" fill="#1E6BFF" opacity="0.4"/>
+      <path d="M163 140 L163 128 Q166 122 169 128 L169 140" fill="#1E6BFF" opacity="0.4"/>
+      <!-- Shamrock -->
+      <circle cx="25" cy="130" r="5" fill="#00E676" opacity="0.3"/>
+      <circle cx="20" cy="125" r="5" fill="#00E676" opacity="0.3"/>
+      <circle cx="30" cy="125" r="5" fill="#00E676" opacity="0.3"/>
+      <line x1="25" y1="132" x2="25" y2="140" stroke="#00E676" stroke-width="1.5" opacity="0.4"/>
+    </svg>`
+  }
+];
+
+/* Scoring constants */
+const PTS_PER_ITEM    = 10;
+const CITY_BONUS      = 10;  // bonus for completing all 5 items in a city
+const STREAK_BONUS    = 5;   // bonus for 3+ cities in a row with ≥ 1 item
+const MAX_BASE_SCORE  = 350; // 7 cities × 5 items × 10
+
+/* Feedback messages */
+const FEEDBACK = [
+  'Points on the board!',
+  'Strong away form!',
+  'Building momentum!',
+  'What a signing!',
+  'Top drawer!',
+  'On the scoresheet!'
+];
+const CITY_COMPLETE_MSG = 'City completed! Full marks!';
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+let state = {
+  username: '',
+  currentRound: 0,
+  selections: {},       // { cityIndex: Set of item indices }
+  skipped: new Set(),
+  score: 0
+};
+
+/* ============================================================
+   DOM REFERENCES
+   ============================================================ */
+const $ = id => document.getElementById(id);
+
+const welcomeScreen    = $('welcome-screen');
+const gameScreen       = $('game-screen');
+const resultsScreen    = $('results-screen');
+const leaderboardScreen = $('leaderboard-screen');
+const topBar           = $('top-bar');
+
+/* ============================================================
+   SETTINGS / REDUCED MOTION
+   ============================================================ */
+$('settings-btn').addEventListener('click', () => $('settings-overlay').classList.remove('hidden'));
+$('close-settings').addEventListener('click', () => $('settings-overlay').classList.add('hidden'));
+$('settings-overlay').addEventListener('click', e => {
+  if (e.target === $('settings-overlay')) $('settings-overlay').classList.add('hidden');
+});
+
+$('reduced-motion-toggle').addEventListener('change', e => {
+  document.body.classList.toggle('reduced-motion', e.target.checked);
+  localStorage.setItem('bucketlist_reducedMotion', e.target.checked ? '1' : '0');
+});
+
+// Restore preference
+if (localStorage.getItem('bucketlist_reducedMotion') === '1') {
+  $('reduced-motion-toggle').checked = true;
+  document.body.classList.add('reduced-motion');
+}
+
+/* ============================================================
+   START GAME
+   ============================================================ */
+$('start-btn').addEventListener('click', startGame);
+$('username-input').addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
+
+function startGame() {
+  const name = $('username-input').value.trim();
+  if (!name) { $('username-input').focus(); return; }
+  state = { username: name, currentRound: 0, selections: {}, skipped: new Set(), score: 0 };
+  CITIES.forEach((_, i) => state.selections[i] = new Set());
+  showScreen('game');
+  renderRound();
+}
+
+/* ============================================================
+   SCREEN TRANSITIONS
+   ============================================================ */
+function showScreen(name) {
+  [welcomeScreen, gameScreen, resultsScreen, leaderboardScreen].forEach(s => s.classList.add('hidden'));
+  topBar.classList.add('hidden');
+  if (name === 'game')        { gameScreen.classList.remove('hidden'); topBar.classList.remove('hidden'); }
+  else if (name === 'results') { resultsScreen.classList.remove('hidden'); topBar.classList.remove('hidden'); }
+  else if (name === 'leaderboard') { leaderboardScreen.classList.remove('hidden'); topBar.classList.remove('hidden'); }
+  else                         { welcomeScreen.classList.remove('hidden'); }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ============================================================
+   RENDER A ROUND
+   ============================================================ */
+function renderRound() {
+  const round = state.currentRound;
+  const city  = CITIES[round];
+
+  $('round-label').textContent = `Round ${round + 1} of ${CITIES.length}`;
+  $('city-title').textContent  = city.name;
+  $('city-illustration').innerHTML = city.svg;
+
+  // Build checklist
+  const list = $('checklist');
+  list.innerHTML = '';
+
+  city.items.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'check-card' + (state.selections[round].has(i) ? ' selected' : '');
+    card.innerHTML = `<div class="check-box"></div><div class="check-label">${item}</div>`;
+    card.addEventListener('click', () => toggleItem(round, i, card));
+    list.appendChild(card);
+  });
+
+  // "None yet" option
+  const noneCard = document.createElement('div');
+  const noneSelected = state.selections[round].has('none');
+  noneCard.className = 'check-card none-card' + (noneSelected ? ' selected' : '');
+  noneCard.innerHTML = `<div class="check-box"></div><div class="check-label">None yet / I haven't visited this office</div>`;
+  noneCard.addEventListener('click', () => toggleNone(round, noneCard));
+  list.appendChild(noneCard);
+
+  updateProgressBars();
+  updateNextBtn();
+}
+
+/* ============================================================
+   ITEM TOGGLING
+   ============================================================ */
+function toggleItem(round, index, card) {
+  const sel = state.selections[round];
+
+  // Deselect "none" if selecting an item
+  sel.delete('none');
+  document.querySelectorAll('.none-card').forEach(c => c.classList.remove('selected'));
+
+  if (sel.has(index)) {
+    sel.delete(index);
+    card.classList.remove('selected');
+  } else {
+    sel.add(index);
+    card.classList.add('selected');
+    card.classList.add('pulse');
+    setTimeout(() => card.classList.remove('pulse'), 400);
+    showPointPop(card);
+    showFeedback(sel.size === CITIES[round].items.length ? CITY_COMPLETE_MSG : randomFeedback());
+  }
+
+  recalcScore();
+  updateProgressBars();
+}
+
+function toggleNone(round, card) {
+  const sel = state.selections[round];
+  if (sel.has('none')) {
+    sel.delete('none');
+    card.classList.remove('selected');
+  } else {
+    // Clear all item selections
+    sel.clear();
+    sel.add('none');
+    document.querySelectorAll('.check-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+  }
+  recalcScore();
+  updateProgressBars();
+}
+
+/* ============================================================
+   SCORING ENGINE
+   ============================================================ */
+function recalcScore() {
+  let total = 0;
+  let streak = 0;
+
+  for (let i = 0; i < CITIES.length; i++) {
+    const sel = state.selections[i];
+    const count = itemCount(sel);
+    const cityPts = count * PTS_PER_ITEM;
+    total += cityPts;
+
+    // City completion bonus
+    if (count === CITIES[i].items.length) total += CITY_BONUS;
+
+    // Streak tracking
+    if (count > 0) {
+      streak++;
+      if (streak >= 3) total += STREAK_BONUS;
+    } else {
+      streak = 0;
+    }
+  }
+
+  state.score = total;
+  $('top-score').textContent = total;
+}
+
+function itemCount(sel) {
+  let c = 0;
+  sel.forEach(v => { if (typeof v === 'number') c++; });
+  return c;
+}
+
+/* ============================================================
+   PROGRESS BARS
+   ============================================================ */
+function updateProgressBars() {
+  // Global
+  const completedRounds = state.currentRound;
+  $('global-progress-text').textContent = `${completedRounds} / ${CITIES.length}`;
+  $('global-progress-bar').style.width = `${(completedRounds / CITIES.length) * 100}%`;
+
+  // City
+  const sel = state.selections[state.currentRound];
+  const count = itemCount(sel);
+  $('city-progress-text').textContent = `${count} / ${CITIES[state.currentRound].items.length}`;
+  $('city-progress-bar').style.width = `${(count / CITIES[state.currentRound].items.length) * 100}%`;
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function updateNextBtn() {
+  $('next-btn').textContent = state.currentRound === CITIES.length - 1 ? 'Finish →' : 'Next City →';
+}
+
+$('next-btn').addEventListener('click', advanceRound);
+$('skip-btn').addEventListener('click', () => {
+  state.skipped.add(state.currentRound);
+  state.selections[state.currentRound].clear();
+  recalcScore();
+  advanceRound();
+});
+
+function advanceRound() {
+  if (state.currentRound < CITIES.length - 1) {
+    state.currentRound++;
+    renderRound();
+    // Animate container
+    const cont = gameScreen.querySelector('.container');
+    cont.classList.remove('animate-in');
+    void cont.offsetWidth; // reflow
+    cont.classList.add('animate-in');
+  } else {
+    finishGame();
+  }
+}
+
+/* ============================================================
+   FEEDBACK & POINT ANIMATIONS
+   ============================================================ */
+function showFeedback(msg) {
+  const toast = $('feedback-toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+function randomFeedback() {
+  return FEEDBACK[Math.floor(Math.random() * FEEDBACK.length)];
+}
+
+function showPointPop(anchor) {
+  const rect = anchor.getBoundingClientRect();
+  const pop = document.createElement('div');
+  pop.className = 'point-pop';
+  pop.textContent = `+${PTS_PER_ITEM}`;
+  pop.style.left = `${rect.right - 40}px`;
+  pop.style.top  = `${rect.top}px`;
+  document.body.appendChild(pop);
+  setTimeout(() => pop.remove(), 1000);
+}
+
+/* ============================================================
+   FINISH GAME — RESULTS
+   ============================================================ */
+function finishGame() {
+  recalcScore();
+
+  const cityScores = CITIES.map((city, i) => {
+    const count = itemCount(state.selections[i]);
+    let pts = count * PTS_PER_ITEM;
+    if (count === city.items.length) pts += CITY_BONUS;
+    return { name: city.name, count, pts, total: city.items.length };
+  });
+
+  const totalItems = cityScores.reduce((s, c) => s + c.count, 0);
+  const maxItems = CITIES.reduce((s, c) => s + c.items.length, 0);
+  const pct = Math.round((totalItems / maxItems) * 100);
+  const citiesVisited = cityScores.filter(c => c.count > 0).length;
+  const best  = cityScores.reduce((a, b) => b.pts > a.pts ? b : a);
+  const worst = cityScores.reduce((a, b) => b.pts < a.pts ? b : a);
+
+  // Dynamic message
+  let message;
+  if (pct >= 75)      message = Math.random() > 0.5 ? 'Top of the table performance!' : 'Elite travel form!';
+  else if (pct >= 40) message = Math.random() > 0.5 ? 'Solid away record!' : 'Climbing the standings!';
+  else                message = Math.random() > 0.5 ? 'Time to build your away form!' : 'Plenty of fixtures left!';
+
+  $('results-message').textContent = message;
+
+  // Stats grid
+  $('results-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-value">${state.username}</div><div class="stat-label">Player</div></div>
+    <div class="stat-card"><div class="stat-value">${state.score}</div><div class="stat-label">Total Score</div></div>
+    <div class="stat-card"><div class="stat-value">${pct}%</div><div class="stat-label">Completion</div></div>
+    <div class="stat-card"><div class="stat-value">${citiesVisited}/${CITIES.length}</div><div class="stat-label">Cities Visited</div></div>
+    <div class="stat-card"><div class="stat-value">${best.name}</div><div class="stat-label">Best City</div></div>
+    <div class="stat-card"><div class="stat-value">${worst.name}</div><div class="stat-label">Worst City</div></div>
+  `;
+
+  // City breakdown bars
+  const barsDiv = $('city-bars');
+  barsDiv.innerHTML = '';
+  const maxCityPts = Math.max(...cityScores.map(c => c.pts), 1);
+  cityScores.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'city-score-row';
+    row.innerHTML = `
+      <div class="city-name">${c.name}</div>
+      <div class="city-bar-track"><div class="city-bar-fill" style="width:0%"></div></div>
+      <div class="city-pts">${c.pts}</div>`;
+    barsDiv.appendChild(row);
+    // Animate bar
+    requestAnimationFrame(() => {
+      row.querySelector('.city-bar-fill').style.width = `${(c.pts / maxCityPts) * 100}%`;
+    });
+  });
+
+  // Badges
+  renderBadges(totalItems, citiesVisited, cityScores);
+
+  // Save to leaderboard
+  saveToLeaderboard({ username: state.username, score: state.score, pct, best: best.name, worst: worst.name, citiesVisited });
+
+  showScreen('results');
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+function renderBadges(totalItems, citiesVisited, cityScores) {
+  const badges = [
+    { id: 'first-stamp',     icon: '🎫', name: 'First Stamp',     unlocked: totalItems >= 1 },
+    { id: 'frequent-flyer',  icon: '✈️',  name: 'Frequent Flyer',  unlocked: citiesVisited >= 4 },
+    { id: 'office-explorer', icon: '🏆', name: 'Office Explorer', unlocked: citiesVisited === CITIES.length && cityScores.every(c => c.count > 0) }
+  ];
+
+  $('badges-row').innerHTML = badges.map(b => `
+    <div class="badge-item ${b.unlocked ? 'unlocked' : ''}">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.name}</div>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   LEADERBOARD (localStorage — see comments for Supabase swap)
+   ============================================================
+
+   ── HOW TO SWAP TO SUPABASE ──────────────────────────────────
+
+   1. Install the Supabase JS client:
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
+
+   2. Initialise client:
+      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+   3. Create a "leaderboard" table in Supabase with columns:
+      id (uuid, primary key, default gen_random_uuid())
+      username (text)
+      score (int4)
+      pct (int4)
+      best (text)
+      worst (text)
+      cities_visited (int4)
+      created_at (timestamptz, default now())
+
+   4. Replace saveToLeaderboard():
+      async function saveToLeaderboard(entry) {
+        await supabase.from('leaderboard').insert([{
+          username: entry.username,
+          score: entry.score,
+          pct: entry.pct,
+          best: entry.best,
+          worst: entry.worst,
+          cities_visited: entry.citiesVisited
+        }]);
+      }
+
+   5. Replace loadLeaderboard():
+      async function loadLeaderboard() {
+        const { data } = await supabase
+          .from('leaderboard')
+          .select('*')
+          .order('score', { ascending: false })
+          .limit(50);
+        return (data || []).map(r => ({
+          username: r.username,
+          score: r.score,
+          pct: r.pct,
+          best: r.best,
+          worst: r.worst,
+          citiesVisited: r.cities_visited
+        }));
+      }
+
+   6. Make renderLeaderboard() async and await loadLeaderboard().
+   ──────────────────────────────────────────────────────────── */
+
+const LB_KEY = 'bucketlist_leaderboard';
+
+/* No demo/seed data — leaderboard only contains real players.
+   One-time cleanup: remove any fake entries left over from earlier versions. */
+if (!localStorage.getItem('bucketlist_cleaned')) {
+  localStorage.removeItem(LB_KEY);
+  localStorage.setItem('bucketlist_cleaned', '1');
+}
+
+function saveToLeaderboard(entry) {
+  const lb = JSON.parse(localStorage.getItem(LB_KEY) || '[]');
+  lb.push(entry);
+  localStorage.setItem(LB_KEY, JSON.stringify(lb));
+}
+
+function loadLeaderboard() {
+  return JSON.parse(localStorage.getItem(LB_KEY) || '[]');
+}
+
+/* ============================================================
+   RENDER LEADERBOARD
+   ============================================================ */
+let lbSortCol = 'score';
+let lbSortAsc = false;
+
+function renderLeaderboard() {
+  const data = loadLeaderboard();
+
+  // Sort
+  data.sort((a, b) => {
+    let va = a[lbSortCol], vb = b[lbSortCol];
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+    if (va < vb) return lbSortAsc ? -1 : 1;
+    if (va > vb) return lbSortAsc ? 1 : -1;
+    return 0;
+  });
+
+  // Header
+  const cols = [
+    { key: 'rank', label: '#' },
+    { key: 'username', label: 'Player' },
+    { key: 'score', label: 'Score' },
+    { key: 'pct', label: '%' },
+    { key: 'best', label: 'Best City' },
+    { key: 'worst', label: 'Worst City' },
+    { key: 'citiesVisited', label: 'Cities' }
+  ];
+
+  $('lb-header').innerHTML = cols.map(c => {
+    const sorted = c.key === lbSortCol;
+    const arrow = sorted ? (lbSortAsc ? '▲' : '▼') : '';
+    return `<th class="${sorted ? 'sorted' : ''}" data-col="${c.key}">${c.label}<span class="sort-arrow">${arrow}</span></th>`;
+  }).join('');
+
+  // Body
+  $('lb-body').innerHTML = data.map((row, i) => {
+    const isMe = row.username === state.username;
+    return `<tr class="${isMe ? 'highlight-row' : ''}">
+      <td class="rank-cell">${i + 1}</td>
+      <td>${row.username}</td>
+      <td>${row.score}</td>
+      <td>${row.pct}%</td>
+      <td>${row.best}</td>
+      <td>${row.worst}</td>
+      <td>${row.citiesVisited}</td>
+    </tr>`;
+  }).join('');
+
+  // Click sort
+  $('lb-header').querySelectorAll('th').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col;
+      if (col === 'rank') return;
+      if (lbSortCol === col) lbSortAsc = !lbSortAsc;
+      else { lbSortCol = col; lbSortAsc = false; }
+      renderLeaderboard();
+    });
+  });
+
+  // Team stats
+  renderTeamStats(data);
+}
+
+function renderTeamStats(data) {
+  if (!data.length) { $('team-stats').innerHTML = ''; return; }
+  const avg = Math.round(data.reduce((s, r) => s + r.score, 0) / data.length);
+
+  // Most / least visited city
+  const cityTally = {};
+  CITIES.forEach(c => cityTally[c.name] = 0);
+  data.forEach(r => {
+    if (r.best) cityTally[r.best] = (cityTally[r.best] || 0) + 1;
+  });
+  const sorted = Object.entries(cityTally).sort((a, b) => b[1] - a[1]);
+  const most = sorted[0] ? sorted[0][0] : '—';
+  const least = sorted[sorted.length - 1] ? sorted[sorted.length - 1][0] : '—';
+
+  $('team-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-value">${avg}</div><div class="stat-label">Avg Score</div></div>
+    <div class="stat-card"><div class="stat-value">${most}</div><div class="stat-label">Most Popular City</div></div>
+    <div class="stat-card"><div class="stat-value">${least}</div><div class="stat-label">Least Popular City</div></div>
+  `;
+}
+
+/* ============================================================
+   NAVIGATION BUTTONS
+   ============================================================ */
+$('view-leaderboard-btn').addEventListener('click', () => { showScreen('leaderboard'); renderLeaderboard(); });
+$('replay-btn').addEventListener('click', replay);
+$('back-results-btn').addEventListener('click', () => showScreen('results'));
+$('replay-from-lb-btn').addEventListener('click', replay);
+
+function replay() {
+  showScreen('welcome');
+  $('username-input').value = state.username;
+  $('username-input').focus();
+}
+</script>
+</body>
+</html>
